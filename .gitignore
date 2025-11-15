@@ -5,6 +5,7 @@
 *.mq5.bak
 *.log
 *.tpl
+!templates/*.tpl
 *.hst
 *.fxt
 *.tick
