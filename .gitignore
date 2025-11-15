@@ -1,0 +1,82 @@
+# MetaTrader
+*.ex4
+*.ex5
+*.mq4.bak
+*.mq5.bak
+*.log
+*.tpl
+*.hst
+*.fxt
+*.tick
+*.dat
+
+# Historial y logs
+history/
+logs/
+tester/
+profiles/
+
+# Configuraciones locales
+config/*.ini
+config/*.cfg
+!config/*.example
+
+# Archivos temporales
+*.tmp
+*.temp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Visual Studio / Unreal
+.vs/
+.vscode/
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+*.sln
+*.suo
+*.user
+*.userosscache
+*.sdf
+*.opensdf
+*.db
+*.opendb
+
+# Unreal Engine
+Content/StarterContent/
+*.uasset
+*.umap
+!Content/Models/*.uasset
+!Content/Models/*.umap
+
+# DLLs compiladas (mantener código fuente)
+*.dll
+!dependencies/*.dll
+
+# Backend
+node_modules/
+.env
+.env.local
+*.pyc
+__pycache__/
+
+# Documentación temporal
+docs/_build/
+docs/.doctrees/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
