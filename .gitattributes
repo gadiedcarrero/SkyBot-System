@@ -1,0 +1,19 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# MQL4 files - use LF line endings
+*.mq4 text eol=lf
+*.mqh text eol=lf
+*.tpl text eol=lf
+
+# Markdown files - use LF
+*.md text eol=lf
+
+# Binary files
+*.ex4 binary
+*.dll binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+

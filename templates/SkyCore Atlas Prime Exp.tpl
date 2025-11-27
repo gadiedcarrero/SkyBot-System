@@ -2,9 +2,9 @@
 id=134047864532774344
 symbol=XAUUSDm
 period=1
-leftpos=66382
+leftpos=65333
 digits=3
-scale=4
+scale=8
 graph=1
 fore=0
 grid=0
@@ -56,7 +56,7 @@ show_data=1
 </indicator>
 <indicator>
 name=Moving Average
-period=50
+period=8
 shift=0
 method=2
 apply=0

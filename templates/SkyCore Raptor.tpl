@@ -2,7 +2,7 @@
 id=134047864532774344
 symbol=XAUUSDm
 period=1
-leftpos=66382
+leftpos=65597
 digits=3
 scale=4
 graph=1
