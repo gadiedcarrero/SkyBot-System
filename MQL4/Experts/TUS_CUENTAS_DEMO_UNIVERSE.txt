@@ -1,0 +1,183 @@
+===================================================================================
+  CONFIGURACIÓN CUENTAS DEMO - SKYBOT UNIVERSE
+  Tus 3 cuentas para testing
+===================================================================================
+
+CUENTAS CREADAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CUENTA 1: HYDRA UNIVERSE
+├── Account Number: 73100644
+├── License Key: SKY-HYDRA-DEMO-644
+├── Robot: SkyCoreHydra_UNIVERSE_v3
+├── Server: Exness-MT4Real
+├── Balance: $5,000 USD
+└── Type: Demo
+
+CUENTA 2: ATLAS UNIVERSE
+├── Account Number: 73100645
+├── License Key: SKY-ATLAS-DEMO-645
+├── Robot: SkyCoreAtlas_UNIVERSE_v3
+├── Server: ICMarketsSC-MT4
+├── Balance: $5,000 USD
+└── Type: Demo
+
+CUENTA 3: RAPTOR UNIVERSE
+├── Account Number: 73100646
+├── License Key: SKY-RAPTOR-DEMO-646
+├── Robot: SkyCoreRaptor_UNIVERSE_v3
+├── Server: FBS-Real
+├── Balance: $5,000 USD
+└── Type: Demo
+
+
+===================================================================================
+CONFIGURACIÓN DE INPUTS PARA CADA EA
+===================================================================================
+
+═══════════════════════════════════════════════════════════════════════════════
+HYDRA UNIVERSE (Cuenta #73100644)
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: SkyCoreHydra_UNIVERSE_v3.mq4
+
+EN LA SECCIÓN DE INPUTS, CONFIGURAR:
+
+input string licenseKey = "SKY-HYDRA-DEMO-644";
+input string userEmail = "test@skybot.com";
+input string supabaseURL = "https://[TU-PROJECT-ID].supabase.co";
+input string supabaseKey = "[TU-ANON-PUBLIC-KEY]";
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ATLAS UNIVERSE (Cuenta #73100645)
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: SkyCoreAtlas_UNIVERSE_v3.mq4
+
+EN LA SECCIÓN DE INPUTS, CONFIGURAR:
+
+input string licenseKey = "SKY-ATLAS-DEMO-645";
+input string userEmail = "test@skybot.com";
+input string supabaseURL = "https://[TU-PROJECT-ID].supabase.co";
+input string supabaseKey = "[TU-ANON-PUBLIC-KEY]";
+
+
+═══════════════════════════════════════════════════════════════════════════════
+RAPTOR UNIVERSE (Cuenta #73100646)
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo: SkyCoreRaptor_UNIVERSE_v3.mq4
+
+EN LA SECCIÓN DE INPUTS, CONFIGURAR:
+
+input string licenseKey = "SKY-RAPTOR-DEMO-646";
+input string userEmail = "test@skybot.com";
+input string supabaseURL = "https://[TU-PROJECT-ID].supabase.co";
+input string supabaseKey = "[TU-ANON-PUBLIC-KEY]";
+
+
+===================================================================================
+CREDENCIALES SUPABASE (Obtener de Dashboard)
+===================================================================================
+
+Ve a: Supabase Dashboard → Settings → API
+
+COPIAR ESTOS VALORES:
+
+Project URL: _______________________________________________________
+             (Ejemplo: https://abcdefghijk.supabase.co)
+
+anon public: _______________________________________________________
+             _______________________________________________________
+             _______________________________________________________
+             (Clave larga que empieza con eyJhbGciOiJIUzI1NiIsInR5cCI6...)
+
+
+===================================================================================
+CONFIGURAR MT4 PARA WEBREQUEST
+===================================================================================
+
+Tools → Options → Expert Advisors
+
+☑ Allow WebRequest for listed URL:
+
+https://[TU-PROJECT-ID].supabase.co
+
+(Reemplazar [TU-PROJECT-ID] con el ID real de tu proyecto)
+
+
+===================================================================================
+ORDEN DE PRUEBA RECOMENDADO
+===================================================================================
+
+1. ✅ Ejecutar script SQL en Supabase (crear licencias)
+2. ✅ Obtener credenciales (Project URL + anon key)
+3. ✅ Modificar Hydra UNIVERSE primero (solo ese)
+4. ✅ Compilar Hydra UNIVERSE
+5. ✅ Configurar WebRequest en MT4
+6. ✅ Probar Hydra en cuenta #73100644
+7. ✅ Si funciona → Modificar Raptor y Atlas
+8. ✅ Probar los 3 robots
+
+
+===================================================================================
+LOGS ESPERADOS EN MT4 JOURNAL
+===================================================================================
+
+Cuando Hydra UNIVERSE inicie correctamente, deberías ver:
+
+═══════════════════════════════════════════════════════════════
+  🚀 SkyCore Hydra UNIVERSE v3.0
+═══════════════════════════════════════════════════════════════
+🔐 Validating license with SkyBot Universe...
+✅ License valid! User ID: [uuid]
+✅ Account ID: [uuid]
+🚀 Starting Hydra session...
+✅ Session started! ID: [uuid]
+✅ Hydra UNIVERSE initialized successfully!
+✅ Session ID: [uuid]
+✅ Ready to trade
+═══════════════════════════════════════════════════════════════
+
+
+===================================================================================
+VERIFICACIÓN EN SUPABASE
+===================================================================================
+
+Después de iniciar un EA, verificar en Supabase → Table Editor:
+
+TABLA: robot_sessions
+BUSCAR: session con robot_name = "Hydra" (o "Raptor", "Atlas")
+VER:
+  - status: "active"
+  - last_heartbeat: actualizado cada 5 min
+  - user_id: debe coincidir con tu usuario
+
+
+TABLA: trades_log
+CUANDO ABRA UN TRADE: Debe aparecer el registro automáticamente
+
+
+===================================================================================
+TROUBLESHOOTING
+===================================================================================
+
+ERROR: "LICENSE VALIDATION FAILED"
+SOLUCIÓN: Verificar que la license key es exactamente: SKY-HYDRA-DEMO-644
+          (sin espacios extras, case-sensitive)
+
+ERROR: "WebRequest Error: 4060"
+SOLUCIÓN: Habilitar WebRequest en MT4
+
+ERROR: "WebRequest Error: 5203"
+SOLUCIÓN: Agregar URL de Supabase a lista permitida
+
+ERROR: No aparece en robot_sessions
+SOLUCIÓN: Verificar credenciales Supabase (URL y anon key correctas)
+
+
+===================================================================================
+ARCHIVO CREADO: 2025-11-30
+PRÓXIMA ACTUALIZACIÓN: Después de testing exitoso
+===================================================================================

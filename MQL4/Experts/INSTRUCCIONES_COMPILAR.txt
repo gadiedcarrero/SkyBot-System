@@ -1,0 +1,85 @@
+========================================
+INSTRUCCIONES PARA COMPILAR Y PROBAR
+========================================
+
+PASO 1: COMPILAR EL EA
+----------------------
+1. Abre MetaTrader 4
+2. Presiona F4 para abrir MetaEditor
+3. En el panel izquierdo, navega a: Experts → SkyCoreAtlas_STANDALONE_v3.mq4
+4. Haz doble clic para abrirlo
+5. Presiona F7 (o click en "Compile")
+6. Verifica en la pestaña "Errors" que diga: "0 error(s), 0 warning(s)"
+7. Deberías ver: "SkyCoreAtlas_STANDALONE_v3.ex4" creado
+
+PASO 2: VERIFICAR EN STRATEGY TESTER
+-------------------------------------
+1. Cierra todas las ventanas de backtest anteriores
+2. Abre Strategy Tester (Ctrl+R o View → Strategy Tester)
+3. Selecciona: SkyCoreAtlas_STANDALONE_v3
+4. Par: EURUSD (o el que quieras probar)
+5. Periodo: M15 o H1
+6. Fechas: últimos 2-3 meses
+7. Click en "Start"
+
+PASO 3: VERIFICAR EN LOGS
+--------------------------
+Mientras corre el backtest, abre la pestaña "Journal" y "Experts"
+
+Deberías ver mensajes como:
+✅ "[FILTRO SOBREEXTENSION] BUY rechazado: Stoch=75.3 > max 70 (tendencia agotada)"
+✅ "[FILTRO SOBREEXTENSION] BUY rechazado: Precio 125 pips por encima de MA8"
+
+Si NO ves esos mensajes, el filtro no se está ejecutando.
+
+PASO 4: COMPARAR RESULTADOS
+----------------------------
+ANTES (sin filtro):
+- Muchas entradas tardías (arriba cuando agotado)
+- Muchas operaciones perdedoras
+
+DESPUÉS (con filtro):
+- Menos entradas, pero MÁS TEMPRANAS
+- Mayor tasa de acierto
+- Entradas en zonas de pullback (abajo, zona roja)
+
+========================================
+CAMBIOS IMPLEMENTADOS (RESUMEN)
+========================================
+
+1. SL/TP ADAPTATIVO:
+   - slMultiplicador = 5.0
+   - SL: ~250 pips EURUSD, ~500 pips USDJPY
+   - TP = SL × 2.0
+
+2. TRAILING ADAPTATIVO:
+   - usarTrailingAdaptativo = true
+   - multiplicadorTrailing = 2.0
+   - Trailing: ~80 pips EURUSD, ~180 pips USDJPY
+
+3. FILTRO ANTI-SOBREEXTENSION (NUEVO):
+   - usarFiltroSobreextension = true
+   - Rechaza BUY si Stochastic > 70
+   - Rechaza SELL si Stochastic < 30
+   - Rechaza si precio > 100 pips de MA8
+
+========================================
+PROBLEMAS COMUNES
+========================================
+
+❌ "No veo cambios en el backtest"
+   → No compilaste. Presiona F7 en MetaEditor
+
+❌ "Salen errores al compilar"
+   → Copia los errores y envíalos
+
+❌ "Sigue entrando tarde"
+   → Verifica los logs (pestaña Experts)
+   → Busca mensajes "[FILTRO SOBREEXTENSION]"
+   → Si no aparecen, el filtro no se está llamando
+
+❌ "No abre ninguna operación"
+   → El filtro está muy estricto
+   → Prueba aumentar stochMaxBuy a 80
+
+========================================

@@ -1,0 +1,293 @@
+===================================================================================
+  GUÍA DE MODIFICACIÓN: ROBOTS UNIVERSE v3
+  SkyCore Galaxy Platform - Backend Integration
+===================================================================================
+
+ARCHIVOS A MODIFICAR:
+- SkyCoreHydra_UNIVERSE_v3.mq4
+- SkyCoreRaptor_UNIVERSE_v3.mq4
+- SkyCoreAtlas_UNIVERSE_v3.mq4
+
+===================================================================================
+PASO 1: AGREGAR INCLUDE DEL MÓDULO UNIVERSE API
+===================================================================================
+
+UBICACIÓN: Al inicio del archivo, después de las propiedades (#property)
+
+AGREGAR ESTAS LÍNEAS:
+
+//+------------------------------------------------------------------+
+//| UNIVERSE: Backend Communication Module                           |
+//+------------------------------------------------------------------+
+#include <SkyCoreUniverseAPI.mqh>
+
+
+===================================================================================
+PASO 2: AGREGAR INPUTS DE CONFIGURACIÓN UNIVERSE
+===================================================================================
+
+UBICACIÓN: En la sección de inputs, al final (después de todos los inputs existentes)
+
+AGREGAR:
+
+//+------------------------------------------------------------------+
+//| UNIVERSE PLATFORM SETTINGS                                        |
+//+------------------------------------------------------------------+
+input string separator_universe = "===== SKYBOT UNIVERSE SETTINGS ====="; // ——————————————————————
+input string licenseKey = ""; // License Key (from dashboard)
+input string userEmail = ""; // Your Email
+input string supabaseURL = "https://dzhwqpxqdcafxkbkvrgg.supabase.co"; // API Endpoint
+input string supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR6aHdxcHhxZGNhZnhrYmt2cmdnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ0ODc2OTIsImV4cCI6MjA4MDA2MzY5Mn0.oxvMlsExKO3a3au4tmItSc-oxOJ8uIKuNUn5DfK1_8g"; // API Key
+
+
+IMPORTANTE: Reemplazar "YOUR-PROJECT" y "YOUR-ANON-KEY-HERE" con los valores reales de Supabase
+
+
+===================================================================================
+PASO 3: MODIFICAR OnInit() - VALIDACIÓN DE LICENCIA
+===================================================================================
+
+UBICACIÓN: Dentro de la función OnInit(), AL INICIO (antes de cualquier otra lógica)
+
+AGREGAR AL INICIO DE OnInit():
+
+   //+------------------------------------------------------------------+
+   //| UNIVERSE: License Validation & Session Start                     |
+   //+------------------------------------------------------------------+
+
+   // Configure Universe API
+   G_supabaseURL = supabaseURL;
+   G_supabaseKey = supabaseKey;
+   G_licenseKey = licenseKey;
+   G_userEmail = userEmail;
+   G_robotName = "Hydra";  // CAMBIAR según el robot: "Hydra", "Raptor", "Atlas"
+
+   Print("═══════════════════════════════════════════════════════════");
+   Print("  🚀 SkyCore ", G_robotName, " UNIVERSE v3.0");
+   Print("═══════════════════════════════════════════════════════════");
+
+   // Validate license
+   if(licenseKey == "" || supabaseURL == "" || supabaseKey == "")
+   {
+      Print("❌ ERROR: Missing UNIVERSE configuration!");
+      Print("⚠️  Please configure:");
+      Print("   - License Key");
+      Print("   - Supabase URL");
+      Print("   - Supabase API Key");
+      Print("═══════════════════════════════════════════════════════════");
+      return INIT_FAILED;
+   }
+
+   if(!ValidateLicense(licenseKey, AccountNumber()))
+   {
+      Print("❌ LICENSE VALIDATION FAILED!");
+      Print("⚠️  Possible reasons:");
+      Print("   - Invalid license key");
+      Print("   - License expired");
+      Print("   - Account number mismatch");
+      Print("   - No internet connection");
+      Print("═══════════════════════════════════════════════════════════");
+      return INIT_FAILED;
+   }
+
+   G_licenseValid = true;
+
+   // Start trading session
+   if(!StartSession(G_robotName, "3.0", MagicNumber))
+   {
+      Print("❌ Failed to start trading session");
+      Print("⚠️  EA will not trade without active session");
+      Print("═══════════════════════════════════════════════════════════");
+      return INIT_FAILED;
+   }
+
+   Print("✅ ", G_robotName, " UNIVERSE initialized successfully!");
+   Print("✅ Session ID: ", G_sessionID);
+   Print("✅ Ready to trade");
+   Print("═══════════════════════════════════════════════════════════");
+
+   // IMPORTANTE: El resto del código OnInit() existente continúa aquí...
+
+
+===================================================================================
+PASO 4: MODIFICAR OnTick() - HEARTBEAT
+===================================================================================
+
+UBICACIÓN: Dentro de OnTick(), AL INICIO (antes de la lógica de trading)
+
+AGREGAR AL INICIO DE OnTick():
+
+   //+------------------------------------------------------------------+
+   //| UNIVERSE: Heartbeat (every 5 minutes)                            |
+   //+------------------------------------------------------------------+
+   if(G_licenseValid && G_sessionID != "")
+   {
+      int openTrades = 0;
+      int closedTrades = 0;
+      double currentProfit = 0;
+
+      // Count trades
+      for(int i = 0; i < OrdersTotal(); i++)
+      {
+         if(OrderSelect(i, SELECT_BY_POS, MODE_TRADES))
+         {
+            if(OrderSymbol() == Symbol() && OrderMagicNumber() == MagicNumber)
+            {
+               openTrades++;
+               currentProfit += OrderProfit() + OrderSwap() + OrderCommission();
+            }
+         }
+      }
+
+      SendHeartbeat(openTrades, closedTrades, currentProfit);
+   }
+
+   // IMPORTANTE: El resto del código OnTick() existente continúa aquí...
+
+
+===================================================================================
+PASO 5: MODIFICAR FUNCIÓN DE APERTURA DE TRADES
+===================================================================================
+
+UBICACIÓN: Encontrar las funciones Compra() y Venta() (o similar donde se abre OrderSend)
+
+DESPUÉS DE UN OrderSend() EXITOSO, AGREGAR:
+
+   // Original code:
+   int ticket = OrderSend(Symbol(), OP_BUY, lote, Ask, Slippage, 0, 0, comentario, MagicNumber, 0, clrBlue);
+
+   if(ticket > 0)
+   {
+      // AGREGAR ESTA LÍNEA:
+      ReportTradeOpened(ticket, Symbol(), OP_BUY, lote, Ask, 0, 0, MagicNumber);
+
+      // ... resto del código existente
+   }
+
+HACER LO MISMO PARA OP_SELL
+
+
+===================================================================================
+PASO 6: MODIFICAR FUNCIÓN DE CIERRE DE TRADES
+===================================================================================
+
+UBICACIÓN: Encontrar donde se cierra con OrderClose()
+
+DESPUÉS DE UN OrderClose() EXITOSO, AGREGAR:
+
+   // Original code:
+   bool closed = OrderClose(ticket, OrderLots(), closePrice, Slippage, clrRed);
+
+   if(closed)
+   {
+      // AGREGAR ESTA LÍNEA:
+      double profit = OrderProfit();
+      double commission = OrderCommission();
+      double swap = OrderSwap();
+      ReportTradeClosed(ticket, closePrice, profit, commission, swap, "manual");
+
+      // ... resto del código existente
+   }
+
+CLOSE REASONS:
+- "tp" = Take Profit
+- "sl" = Stop Loss
+- "manual" = Cierre manual
+- "ea_logic" = Lógica del EA (scalping, MA200, etc.)
+
+
+===================================================================================
+PASO 7: AGREGAR OnDeinit() - FINALIZAR SESIÓN
+===================================================================================
+
+UBICACIÓN: Crear función OnDeinit() si no existe, o modificar la existente
+
+AGREGAR O MODIFICAR:
+
+//+------------------------------------------------------------------+
+//| Expert deinitialization function                                 |
+//+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+{
+   //+------------------------------------------------------------------+
+   //| UNIVERSE: End Session                                            |
+   //+------------------------------------------------------------------+
+   if(G_sessionID != "")
+   {
+      Print("═══════════════════════════════════════════════════════════");
+      Print("  🛑 Stopping ", G_robotName, " UNIVERSE");
+      Print("═══════════════════════════════════════════════════════════");
+      EndSession();
+   }
+
+   // Resto del código OnDeinit existente (si lo hay)
+}
+
+
+===================================================================================
+PASO 8: CONFIGURAR MT4 PARA PERMITIR WEBREQUEST
+===================================================================================
+
+1. Abrir MT4
+2. Tools → Options → Expert Advisors
+3. En "Allow WebRequest for listed URL:", agregar:
+   https://YOUR-PROJECT.supabase.co
+
+   (Reemplazar YOUR-PROJECT con el ID real de tu proyecto Supabase)
+
+4. Marcar checkbox "Allow WebRequest for listed URL"
+5. Click OK
+
+
+===================================================================================
+NOTAS IMPORTANTES
+===================================================================================
+
+1. MAGIC NUMBER:
+   - Cada robot UNIVERSE debe tener un MagicNumber único
+   - Formato recomendado: [RobotID * 100000] + UserID
+   - Ejemplo: Hydra (ID=1) + User (ID=42) = 100042
+
+2. VARIABLES GLOBALES:
+   - G_robotName debe ser: "Hydra", "Raptor", o "Atlas"
+   - Cambiar según el robot que estés modificando
+
+3. TESTING:
+   - Probar primero en demo account
+   - Verificar que aparezcan logs en Journal de MT4
+   - Verificar en Supabase que se crean registros en las tablas
+
+4. ERRORES COMUNES:
+   - Error 4060: WebRequest no habilitado
+   - Error 5203: URL no en lista permitida
+   - "Invalid license": Verificar license key y account number
+
+5. COMPILACIÓN:
+   - Después de modificar, compilar el EA
+   - Verificar que no haya errores
+   - Warnings de WebRequest son normales
+
+===================================================================================
+VALORES A REEMPLAZAR ANTES DE COMPILAR
+===================================================================================
+
+EN LA SECCIÓN DE INPUTS (PASO 2):
+
+supabaseURL = "https://YOUR-PROJECT.supabase.co"
+                     ^^^^^^^^^^^^^^ → Reemplazar con tu project ID
+
+supabaseKey = "YOUR-ANON-KEY-HERE"
+              ^^^^^^^^^^^^^^^^^^^ → Reemplazar con tu anon key de Supabase
+
+
+EN OnInit() (PASO 3):
+
+G_robotName = "Hydra";  → Cambiar a "Raptor" o "Atlas" según el robot
+
+
+===================================================================================
+FIN DE LA GUÍA
+===================================================================================
+
+Una vez modificados los 3 EAs (Hydra, Raptor, Atlas), compilar y probar
+en cuenta demo con las credenciales de Supabase correctas.
